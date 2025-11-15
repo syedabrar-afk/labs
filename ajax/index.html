@@ -1,0 +1,129 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-R">
+  <title>Acme Social</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; }
+    h1, h2, h3 { color: #333; }
+    #my-profile, #other-profile, #comments-section { border: 1px solid #ccc; padding: 15px; margin-top: 20px; }
+    input { margin-right: 10px; }
+    .comment { border-top: 1px solid #eee; padding-top: 8px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+  <h1>Welcome to Acme Social</h1>
+
+  <div id="login-area">
+    <h3>Simulated Login</h3>
+    <p>Click to log in as a user:</p>
+    <button onclick="login(1)">Log in as Alice (User 1)</button>
+    <button onclick="login(2)">Log in as Bob (User 2)</button>
+    <h2 id="welcome-message">Not logged in</h2>
+  </div>
+
+  <div id="my-profile" style="display:none;">
+    <h3>My Private Profile</h3>
+    <pre id="profile-data"></pre>
+    <div>
+      <h3>Change My Username</h3>
+      <input type="text" id="new-username-input" placeholder="New username">
+      <button onclick="changeUsername()">Update</button>
+    </div>
+  </div>
+
+  <div id="other-profile" style="display:none;">
+    <h3>View Other Profile</h3>
+    <input type="text" id="other-user-id" placeholder="Enter user ID (e.g., 2)">
+    <button onclick="viewOtherProfile()">View Profile</button>
+    <pre id="other-profile-data"></pre>
+  </div>
+
+  <div id="comments-section">
+    <h3>Public Wall</h3>
+    <div id="comments-list"></div>
+    <hr>
+    <div>
+      <input type="text" id="comment-input" placeholder="Write a comment..." style="width: 300px;">
+      <button onclick="postComment()">Post</button>
+    </div>
+  </div>
+
+
+  <script>
+    let currentUserID = null;
+
+    // --- Login & Profile Functions ---
+    async function login(id) {
+      const res = await fetch(`/api/login/${id}`);
+      const data = await res.json();
+      document.getElementById('welcome-message').innerText = data.message;
+      currentUserID = id;
+      document.getElementById('my-profile').style.display = 'block';
+      document.getElementById('other-profile').style.display = 'block';
+      loadMyProfile();
+      loadComments();
+    }
+
+    async function loadMyProfile() {
+      if (!currentUserID) return;
+      const res = await fetch(`/api/user/${currentUserID}`);
+      const data = await res.json();
+      // We only *show* the username and email, but...
+      document.getElementById('profile-data').innerText = 
+        `Username: ${data.username}\nEmail: ${data.email}\nNote: ${data.privateNote}`;
+      // In a real app, the frontend JS would have the *entire* object in memory
+      console.log('Full data received for my profile:', data);
+    }
+    
+    // --- Change Username Function (for CSRF) ---
+    async function changeUsername() {
+      const newName = document.getElementById('new-username-input').value;
+      await fetch('/api/user/update-username', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newName: newName })
+      });
+      loadMyProfile(); // Refresh profile
+    }
+
+    // --- Other Profile Function (for IDOR) ---
+    async function viewOtherProfile() {
+      const id = document.getElementById('other-user-id').value;
+      const res = await fetch(`/api/user/${id}`);
+      const data = await res.json();
+      // The app is *supposed* to only show the username
+      document.getElementById('other-profile-data').innerText = `Username: ${data.username}`;
+    }
+
+    // --- Comment Functions (for XSS) ---
+    async function loadComments() {
+      const res = await fetch('/api/comments');
+      const comments = await res.json();
+      const list = document.getElementById('comments-list');
+      list.innerHTML = ''; // Clear list
+      for (const comment of comments) {
+        // VULNERABILITY #3 (XSS):
+        // We use .innerHTML, which tells the browser to parse and run any HTML
+        list.innerHTML += `<div class="comment"><strong>${comment.author}:</strong> ${comment.text}</div>`;
+      }
+    }
+
+    async function postComment() {
+      const text = document.getElementById('comment-input').value;
+      await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text })
+      });
+      document.getElementById('comment-input').value = '';
+      loadComments(); // Refresh comments
+    }
+    
+    // Load comments on page load
+    loadComments();
+  </script>
+</body>
+</html>

