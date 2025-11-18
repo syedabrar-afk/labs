@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SOP Exceptions Lab - Origin A</title>
+</head>
+<body>
+  <h1>SOP Exceptions Lab (Origin A: 8000)</h1>
+  <p>Open the console (F12) to see all results.</p>
+  
+  <button id="openWindow">1. Open Cross-Origin Window</button>
+  <hr>
+
+  <h3>Test Group 1: Location (Writable, Not Readable)</h3>
+  <button id="testLocationWrite">2. Test: Write location.href</button>
+  <button id="testLocationRead">3. Test: Read location.href</button>
+  <button id="testLocationReplace">4. Test: Call location.replace()</button>
+
+  <h3>Test Group 2: Window Properties (Readable)</h3>
+  <button id="testWindowLength">5. Test: Read window.length</button>
+  <button id="testWindowClosed">6. Test: Read window.closed</button>
+
+  <h3>Test Group 3: Callable Functions</h3>
+  <button id="testFocus">7. Test: Call focus()</button>
+  <button id="testBlur">8. Test: Call blur()</button>
+  <button id="testPostMessage">9. Test: Call postMessage()</button>
+  <button id="testClose">10. Test: Call close()</button>
+
+  <script>
+    let crossOriginWindow; // This will hold the reference to the new window
+
+    // Helper to check if window is open
+    function checkWindow() {
+      if (!crossOriginWindow || crossOriginWindow.closed) {
+        console.warn('Window is not open. Please click "Open Window" first.');
+        return false;
+      }
+      return true;
+    }
+
+    // 1. Open the window
+    document.getElementById('openWindow').onclick = () => {
+      crossOriginWindow = window.open('http://localhost:9000/page.html', 'crossOriginWin');
+      console.log('Window opened. Handle:', crossOriginWindow);
+    };
+
+    // --- Test Group 1: Location ---
+
+    // 2. Test: Write location.href (Writable for navigation)
+    document.getElementById('testLocationWrite').onclick = () => {
+      if (!checkWindow()) return;
+      try {
+        // This "write" is permitted because it's a navigation action
+        crossOriginWindow.location.href = 'http://localhost:9000/page.html?data=written';
+        console.log('✅ location.href WRITE: Command sent to navigate. Check the child window URL.');
+      } catch (e) {
+        console.error('❌ location.href WRITE failed:', e.message);
+      }
+    };
+
+    // 3. Test: Read location.href (Not Readable)
+    document.getElementById('testLocationRead').onclick = () => {
+      if (!checkWindow()) return;
+      try {
+        let href = crossOriginWindow.location.href;
+        console.log('✅ location.href READ success:', href);
+      } catch (e) {
+        // This is the error we expect!
+        console.error('❌ location.href READ FAILED (SOP Blocked):', e.message);
+      }
+    };
+
+    // 4. Test: Call location.replace() (Callable for navigation)
+    document.getElementById('testLocationReplace').onclick = () => {
+      if (!checkWindow()) return;
+      try {
+        crossOriginWindow.location.replace('http://localhost:9000/page.html?replaced=true');
+        console.log('✅ location.replace() CALL: Command sent. Check the child window URL.');
+      } catch (e) {
+        console.error('❌ location.replace() CALL failed:', e.message);
+      }
+    };
+
+    // --- Test Group 2: Window Properties ---
+
+    // 5. Test: Read window.length (Readable)
+    document.getElementById('testWindowLength').onclick = () => {
+      if (!checkWindow()) return;
+      try {
+        // 'length' is the number of frames in the window
+        let len = crossOriginWindow.length; 
+        console.log('✅ window.length READ success. Value:', len);
+      } catch (e) {
+        console.error('❌ window.length READ failed:', e.message);
+      }
+    };
+
+    // 6. Test: Read window.closed (Readable)
+    document.getElementById('testWindowClosed').onclick = () => {
+      try {
+        let closed = crossOriginWindow.closed;
+        console.log('✅ window.closed READ success. Value:', closed);
+      } catch (e) {
+        console.error('❌ window.closed READ failed:', e.message);
+      }
+    };
+
+    // --- Test Group 3: Callable Functions ---
+
+    // 7. Test: Call focus()
+    document.getElementById('testFocus').onclick = () => {
+      if (!checkWindow()) return;
+      try {
+        crossOriginWindow.focus();
+        console.log('✅ focus() CALL success. (Child window should come to front)');
+      } catch (e) {
+        console.error('❌ focus() CALL failed:', e.message);
+      }
+    };
+
+    // 8. Test: Call blur()
+    document.getElementById('testBlur').onclick = () => {
+      if (!checkWindow()) return;
+      try {
+        crossOriginWindow.blur();
+        console.log('✅ blur() CALL success. (Child window should lose focus)');
+      } catch (e) {
+        console.error('❌ blur() CALL failed:', e.message);
+      }
+    };
+
+    // 9. Test: Call postMessage()
+    document.getElementById('testPostMessage').onclick = () => {
+      if (!checkWindow()) return;
+      try {
+        // Send 'Hello!' to the target origin 'http://localhost:9000'
+        crossOriginWindow.postMessage('Hello from Origin A!', 'http://localhost:9000');
+        console.log('✅ postMessage() CALL success. Check the child window!');
+      } catch (e) {
+        console.error('❌ postMessage() CALL failed:', e.message);
+      }
+    };
+
+    // 10. Test: Call close()
+    document.getElementById('testClose').onclick = () => {
+      if (!checkWindow()) return;
+      try {
+        crossOriginWindow.close();
+        console.log('✅ close() CALL success. (Child window should close)');
+      } catch (e) {
+        console.error('❌ close() CALL failed:', e.message);
+      }
+    };
+  </script>
+</body>
+</html>

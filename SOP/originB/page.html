@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Origin B Page</title>
+</head>
+<body style="background-color: #eee;">
+  <h1 id="message">Hello from Origin B (port 9000)</h1>
+  <p>This window is a separate origin.</p>
+
+  <script>
+    // This is for the postMessage test
+    window.addEventListener('message', (event) => {
+      // Security best practice: always check the origin
+      if (event.origin !== 'http://localhost:8000') {
+        console.warn('Message ignored from unexpected origin:', event.origin);
+        return;
+      }
+      
+      // Update the page to show the message was received
+      document.getElementById('message').innerText = 'Message Received: ' + event.data;
+      document.body.style.backgroundColor = 'lightgreen';
+    });
+  </script>
+</body>
+</html>

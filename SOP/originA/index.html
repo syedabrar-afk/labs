@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+  <title>SOP Lab - Origin A</title>
+
+  <!-- This works  -->
+  <link rel="stylesheet" href="http://localhost:9000/style.css">
+  <script src="http://localhost:9000/script.js"></script>
+
+</head>
+<body>
+  <h1>Hello from Origin A (localhost:8000)</h1>
+
+  <h3>Test 3: Loading an &lt;img&gt;</h3>
+  <img id="my-image" src="http://localhost:9000/image.png" alt="Cross-origin image" width="200">
+  <hr>
+
+  <h3>Test 4: Loading an &lt;iframe&gt;</h3>
+  <iframe id="my-iframe" src="http://localhost:9000/index.html" width="400" height="100"></iframe>
+  <hr>
+
+  <h2>--- JavaScript Read Attempts (Check the Console!) ---</h2>
+  <script>
+    console.log('Running JavaScript from Origin A...');
+
+    // TEST 1 (READ): Try to read the stylesheet's rules
+    // console.log('Attempting to read cross-origin stylesheet...');
+    // try {
+    //   // We can see the stylesheet, but not its rules
+    //   let rules = document.styleSheets[1].cssRules; 
+    //   console.log('✅ Stylesheet read success:', rules);
+    // } catch (e) {
+    //   console.error('❌ FAILED to read stylesheet:', e.message);
+    // }
+
+    // TEST 3 (READ): Try to read the <img> data via <canvas>
+    // console.log('Attempting to read cross-origin image data...');
+    // try {
+    //   const img = document.getElementById('my-image');
+    //   const canvas = document.createElement('canvas');
+    //   const ctx = canvas.getContext('2d');
+    //   ctx.drawImage(img, 0, 0);
+    //   // This 'read' operation will fail
+    //   const dataURL = canvas.toDataURL(); 
+    //   console.log('✅ Image read success:', dataURL.substring(0, 30) + '...');
+    // } catch (e) {
+    //   console.error('❌ FAILED to read image (Tainted Canvas):', e.message);
+    // }
+
+    // TEST 4 (READ): Try to read the <iframe> content
+    // console.log('Attempting to read cross-origin iframe content...');
+    // try {
+    //   const iframe = document.getElementById('my-iframe');
+    //   // This 'read' operation will fail
+    //   let iframeDoc = iframe.contentWindow.document;
+    //   let heading = iframeDoc.querySelector('h1').innerText;
+    //   console.log('✅ Iframe read success:', heading);
+    // } catch (e) {
+    //   console.error('❌ FAILED to read iframe content:', e.message);
+    // }
+
+    // TEST 5 (READ): Try to 'fetch' the script file as data
+    // console.log('Attempting to "fetch" cross-origin script as text...');
+    // fetch('http://localhost:9000/script.js')
+    //   .then(response => response.text())
+    //   .then(data => {
+    //     console.log('✅ Fetch success:', data);
+    //   })
+    //   .catch(e => {
+    //     console.error('❌ FAILED to fetch script text (CORS Error):', e.message);
+    //   });
+  </script>
+
+</body>
+</html>
